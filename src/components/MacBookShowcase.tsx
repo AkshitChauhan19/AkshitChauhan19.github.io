@@ -250,10 +250,24 @@ export function MacBookShowcase({ onSelectProject }: MacBookShowcaseProps) {
       if (!host) return;
       const w = host.clientWidth || window.innerWidth;
       const h = host.clientHeight || window.innerHeight;
-      camera.aspect = w / h;
-      const scaleFactor = w < 640 ? 0.72 : w < 960 ? 0.86 : 1;
-      laptop.scale.setScalar(scaleFactor);
+      const aspect = w / Math.max(h, 1);
+      camera.aspect = aspect;
       camera.updateProjectionMatrix();
+
+      // Exact perspective frustum fit so the 3D MacBook scales dynamically to ANY screen aspect ratio
+      const dist = camera.position.length();
+      const vFovRad = THREE.MathUtils.degToRad(camera.fov);
+      const visibleHeight = 2 * Math.tan(vFovRad / 2) * dist;
+      const visibleWidth = visibleHeight * aspect;
+
+      // Bounding envelope with safe margin for rotation & top/bottom editorial captions
+      const fitWidth = (visibleWidth * 0.88) / 4.05;
+      const fitHeight = (visibleHeight * 0.72) / 3.1;
+      const scaleFactor = Math.max(0.32, Math.min(1.0, fitWidth, fitHeight));
+      laptop.scale.setScalar(scaleFactor);
+
+      // Slight vertical centering tweak on narrow portrait phones
+      laptop.position.z = 0;
       renderer.setSize(w, h);
       updateTargetFromScroll();
     };

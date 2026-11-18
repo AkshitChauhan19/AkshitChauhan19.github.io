@@ -1129,6 +1129,7 @@ img {
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100dvh;
   width: 100%;
   overflow: hidden;
   display: flex;
@@ -1257,6 +1258,10 @@ img {
 @media (max-width: 768px) {
   .macbook-scroll-track {
     height: 300vh;
+  }
+  .macbook-sticky {
+    padding-top: 84px;
+    padding-bottom: 24px;
   }
   .macbook-sticky__hint {
     display: none;

@@ -203,10 +203,15 @@ export function ParticleRoseCanvas() {
       if (!container) return;
       const w = container.clientWidth || window.innerWidth;
       const h = container.clientHeight || window.innerHeight;
-      camera.aspect = w / h;
+      const aspect = w / Math.max(h, 1);
+      camera.aspect = aspect;
       camera.updateProjectionMatrix();
+      // Scale rose smoothly on narrow portrait screens so petals never clip horizontally
+      const roseScale = aspect < 1 ? Math.max(0.55, aspect * 1.18) : 1;
+      points.scale.setScalar(roseScale);
       renderer.setSize(w, h);
     };
+    onResize();
 
     const observer = new IntersectionObserver(
       (entries) => {
