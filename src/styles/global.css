@@ -80,29 +80,32 @@ img {
 }
 
 /* ============================================
-   CUSTOM CURSOR (GPU translate3d, difference)
+   ENHANCED FLUID VELOCITY CURSOR
    ============================================ */
 .custom-cursor {
   position: fixed;
   top: 0;
   left: 0;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #ffffff;
   mix-blend-mode: difference;
   pointer-events: none;
   z-index: 9999;
   transform: translate3d(-100px, -100px, 0) translate(-50%, -50%);
-  will-change: transform, width, height;
+  will-change: transform, width, height, background-color, border-color;
   transition:
-    width 0.22s var(--ease-expo),
-    height 0.22s var(--ease-expo),
-    background-color 0.22s ease,
-    border-color 0.22s ease,
-    opacity 0.2s ease;
+    width 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+    height 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.28s ease,
+    border-color 0.28s ease,
+    opacity 0.22s ease;
   opacity: 0;
   border: 1.5px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .custom-cursor.is-visible {
@@ -110,17 +113,61 @@ img {
 }
 
 .custom-cursor.is-hover {
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   background: transparent;
   border-color: #ffffff;
 }
 
 .custom-cursor.is-card {
-  width: 58px;
-  height: 58px;
+  width: 72px;
+  height: 72px;
   background: #ffffff;
   border-color: transparent;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.custom-cursor__label {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: #000000;
+  opacity: 0;
+  transform: scale(0.65);
+  transition: opacity 0.24s ease, transform 0.24s var(--ease-expo);
+  pointer-events: none;
+  user-select: none;
+}
+
+.custom-cursor.is-card .custom-cursor__label {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.custom-cursor__dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #ffffff;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  z-index: 10000;
+  transform: translate3d(-100px, -100px, 0) translate(-50%, -50%);
+  will-change: transform, opacity;
+  transition: opacity 0.2s ease;
+  opacity: 0;
+}
+
+.custom-cursor__dot.is-visible {
+  opacity: 0.95;
+}
+
+.custom-cursor__dot.is-hidden {
+  opacity: 0;
 }
 
 /* Hide native OS cursor on desktop devices with a mouse so the animated circle converts into the cursor */
@@ -135,7 +182,8 @@ img {
 }
 
 @media (hover: none), (pointer: coarse) {
-  .custom-cursor {
+  .custom-cursor,
+  .custom-cursor__dot {
     display: none !important;
   }
 }
