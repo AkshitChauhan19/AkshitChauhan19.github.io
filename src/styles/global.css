@@ -667,12 +667,25 @@ img {
 /* ============================================
    HOME HERO (3D Particle Rose + Editorial Title)
    ============================================ */
+/* Persistent 3D Cosmic Galaxy Canvas */
+.global-galaxy-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
 .home-hero {
   position: relative;
+  z-index: 1;
   width: 100%;
   height: 100vh;
   min-height: 640px;
-  background: #000000;
+  background: transparent;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -719,7 +732,8 @@ img {
 @media (max-width: 768px) {
   .home-hero__title {
     white-space: normal;
-    font-size: clamp(34px, 10vw, 54px);
+    font-size: clamp(30px, 8.5vw, 52px);
+    line-height: 1.08;
   }
 }
 
@@ -727,8 +741,10 @@ img {
    BIO SECTION + ORGANIC PORTRAIT + MARQUEE
    ============================================ */
 .bio-section {
-  background: #000000;
-  padding: clamp(96px, 13vh, 150px) clamp(24px, 6vw, 92px) clamp(56px, 7vh, 88px) clamp(72px, 7vw, 108px);
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  padding: clamp(80px, 11vh, 136px) clamp(24px, 5vw, 84px);
   max-width: 1440px;
   margin: 0 auto;
 }
@@ -736,7 +752,7 @@ img {
 .bio-grid {
   display: grid;
   grid-template-columns: 1.35fr 0.75fr;
-  gap: clamp(40px, 6vw, 96px);
+  gap: clamp(40px, 5vw, 84px);
   align-items: center;
 }
 
@@ -804,24 +820,58 @@ img {
 }
 
 @media (max-width: 900px) {
+  .bio-section {
+    padding: clamp(48px, 8vh, 84px) clamp(16px, 4.5vw, 28px);
+  }
+
   .bio-grid {
-    grid-template-columns: 1fr;
+    /* Keep text on LEFT and portrait on RIGHT, identical to PC! */
+    grid-template-columns: 1fr clamp(112px, 32vw, 180px);
+    gap: clamp(14px, 3.5vw, 24px);
+    align-items: start;
   }
 
   .bio-portrait-wrap {
-    order: -1;
-    justify-content: flex-start;
+    order: unset; /* Portrait stays on the right, matching PC! */
+    justify-content: flex-end;
+    position: sticky;
+    top: 96px;
+  }
+
+  .bio-portrait-svg-mask {
+    width: 100%;
+    max-width: 180px;
+    aspect-ratio: 3 / 4;
+  }
+
+  .bio-text {
+    gap: 16px;
+  }
+
+  .bio-text p {
+    font-size: clamp(13.5px, 3.6vw, 16.5px);
+    line-height: 1.58;
+  }
+
+  .bio-text__meta {
+    font-size: 11px;
+    gap: 8px 12px;
+    padding-top: 4px;
   }
 }
 
 /* Marquee Ticker */
 .marquee-band {
+  position: relative;
+  z-index: 1;
   width: 100%;
   overflow: hidden;
-  padding: clamp(44px, 6vh, 72px) 0;
+  padding: clamp(36px, 5vh, 64px) 0;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: #000000;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .marquee-track {
@@ -876,10 +926,12 @@ img {
    RESUME EDITORIAL SECTION (Experience, Skills, Education)
    ============================================ */
 .resume-section {
-  background: #000000;
+  position: relative;
+  z-index: 1;
+  background: transparent;
   max-width: 1440px;
   margin: 0 auto;
-  padding: clamp(72px, 10vh, 124px) clamp(24px, 6vw, 92px) clamp(72px, 10vh, 124px) clamp(72px, 7vw, 108px);
+  padding: clamp(64px, 9vh, 116px) clamp(24px, 5vw, 84px);
 }
 
 .editorial-header {
@@ -1180,8 +1232,9 @@ img {
    ============================================ */
 .macbook-scroll-track {
   position: relative;
+  z-index: 1;
   height: 330vh;
-  background: #000000;
+  background: transparent;
 }
 
 .macbook-sticky {
@@ -1194,7 +1247,7 @@ img {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 96px clamp(28px, 4.5vw, 64px) clamp(28px, 4vh, 48px) clamp(72px, 6.5vw, 92px);
+  padding: 96px clamp(24px, 4.5vw, 64px) clamp(28px, 4vh, 48px);
 }
 
 .macbook-sticky__canvas {
@@ -1321,6 +1374,8 @@ img {
   .macbook-sticky {
     padding-top: 84px;
     padding-bottom: 24px;
+    padding-left: clamp(16px, 4vw, 24px);
+    padding-right: clamp(16px, 4vw, 24px);
   }
   .macbook-sticky__hint {
     display: none;
@@ -1331,7 +1386,9 @@ img {
    HOME CTA SECTION
    ============================================ */
 .cta-section {
-  background: #000000;
+  position: relative;
+  z-index: 1;
+  background: transparent;
   padding: clamp(80px, 11vh, 128px) 24px;
   text-align: center;
   display: flex;
@@ -1724,7 +1781,7 @@ img {
 }
 
 .detail-hero {
-  padding: 132px clamp(24px, 6vw, 88px) 64px clamp(72px, 7vw, 108px);
+  padding: 132px clamp(24px, 5vw, 84px) 64px;
   max-width: 1360px;
   margin: 0 auto;
 }

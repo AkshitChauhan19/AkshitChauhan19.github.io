@@ -31,7 +31,10 @@ export function HomePage({ onNavigate }: HomePageProps) {
   }, []);
 
   return (
-    <main>
+    <main style={{ position: 'relative' }}>
+      {/* Persistent 3D Cosmic Galaxy Canvas — Fluid galaxy background throughout the whole website */}
+      <ParticleRoseCanvas />
+
       {/* Hidden SVG clipPath definition for the organic wavy portrait mask */}
       <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
         <defs>
@@ -41,9 +44,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
         </defs>
       </svg>
 
-      {/* 1. HERO SECTION — 3D Particle Rose + Massive Display Title */}
+      {/* 1. HERO SECTION — Massive Display Title */}
       <section className="home-hero">
-        <ParticleRoseCanvas />
         <div className="home-hero__content">
           <p className="home-hero__caption">{PERSONAL_INFO.heroCaption}</p>
           <h1 className="home-hero__title">{PERSONAL_INFO.heroHeadline}</h1>

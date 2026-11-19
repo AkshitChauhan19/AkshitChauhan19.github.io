@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { PROJECTS } from '../data/portfolio';
 import { soundEngine } from '../utils/sound';
+import { gyro } from '../utils/gyroscope';
 
 interface MacBookShowcaseProps {
   onSelectProject: (projectId: string) => void;
@@ -311,11 +312,17 @@ export function MacBookShowcase({ onSelectProject }: MacBookShowcaseProps) {
         setActiveIndex(nearest);
       }
 
-      // Elegant sculptural rotation across projects + subtle float
+      // Sample mobile gyroscope tilt
+      const { x: gyroX, y: gyroY } = gyro.update(0.08);
+
+      // Elegant sculptural rotation across projects + mobile gyroscope tilt + subtle float
+      const effectivePointerX = pointer.x + gyroX * 0.45;
+      const effectivePointerY = pointer.y + gyroY * 0.35;
+
       const sweepAngle = Math.sin(scrollProgressRef.current * Math.PI * 2) * 0.22;
-      laptop.rotation.y = sweepAngle + pointer.x * 0.16;
-      laptop.rotation.x = 0.08 - pointer.y * 0.08;
-      laptop.position.y = Math.sin(time * 0.0014) * 0.045;
+      laptop.rotation.y = sweepAngle + effectivePointerX * 0.22;
+      laptop.rotation.x = 0.08 - effectivePointerY * 0.12;
+      laptop.position.y = Math.sin(time * 0.0014) * 0.045 - effectivePointerY * 0.04;
 
       renderer.render(scene, camera);
     };
