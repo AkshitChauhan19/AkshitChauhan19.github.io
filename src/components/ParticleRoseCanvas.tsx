@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { gyro } from '../utils/gyroscope';
 
 const VERTEX_SHADER = /* glsl */ `
   uniform float uTime;
@@ -244,11 +245,15 @@ export function ParticleRoseCanvas() {
 
       pointerCurrent.x += (pointerTarget.x - pointerCurrent.x) * 0.06;
       pointerCurrent.y += (pointerTarget.y - pointerCurrent.y) * 0.06;
-      uniforms.uPointer.value.set(pointerCurrent.x, pointerCurrent.y);
+
+      const { x: gyroX, y: gyroY } = gyro.update(0.08);
+      const effX = pointerCurrent.x + gyroX * 0.45;
+      const effY = pointerCurrent.y + gyroY * 0.45;
+      uniforms.uPointer.value.set(effX, effY);
 
       points.rotation.y += dt * 0.14;
-      points.rotation.x = 0.28 + pointerCurrent.y * 0.24;
-      points.rotation.z = -pointerCurrent.x * 0.14;
+      points.rotation.x = 0.28 + effY * 0.24;
+      points.rotation.z = -effX * 0.14;
 
       renderer.render(scene, camera);
     };
@@ -270,5 +275,5 @@ export function ParticleRoseCanvas() {
     };
   }, []);
 
-  return <div ref={containerRef} className="home-hero__canvas" aria-hidden="true" />;
+  return <div ref={containerRef} className="page-galaxy-canvas" aria-hidden="true" />;
 }
