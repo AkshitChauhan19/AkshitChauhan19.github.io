@@ -49,14 +49,10 @@ export function CustomCursor() {
     };
 
     const render = () => {
-      currentX += (targetX - currentX) * 0.22;
-      currentY += (targetY - currentY) * 0.22;
-      const offset = el.classList.contains('is-card')
-        ? 29
-        : el.classList.contains('is-hover')
-          ? 22
-          : 9;
-      el.style.transform = `translate3d(${(currentX - offset).toFixed(2)}px, ${(currentY - offset).toFixed(2)}px, 0)`;
+      // Fast, responsive lerp (0.42) so the cursor moves seamlessly with the mouse hardware
+      currentX += (targetX - currentX) * 0.42;
+      currentY += (targetY - currentY) * 0.42;
+      el.style.transform = `translate3d(${currentX.toFixed(2)}px, ${currentY.toFixed(2)}px, 0) translate(-50%, -50%)`;
       rafId = requestAnimationFrame(render);
     };
 

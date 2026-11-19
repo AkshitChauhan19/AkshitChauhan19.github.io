@@ -22,6 +22,20 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
   const [submitState, setSubmitState] = useState<SubmitState>('idle');
   const [statusMessage, setStatusMessage] = useState('');
 
+  const buildMailtoUrl = () => {
+    const subject = encodeURIComponent(
+      `Portfolio Inquiry from ${formData.name || 'Visitor'}${formData.company ? ` (${formData.company})` : ''}`
+    );
+    const body = encodeURIComponent(
+      `Name: ${formData.name || 'N/A'}\n` +
+      `Company: ${formData.company || 'N/A'}\n` +
+      `Email: ${formData.email || 'N/A'}\n` +
+      `Phone: ${formData.phone || 'N/A'}\n\n` +
+      `Message / Project Details:\n${formData.details || 'Hi Akshit, I would like to connect with you regarding an opportunity.'}`
+    );
+    return `mailto:${PERSONAL_INFO.email}?subject=${subject}&body=${body}`;
+  };
+
   const buildWhatsAppUrl = () => {
     const lines = [
       `Hi Akshit! I'm reaching out from your portfolio.`,
@@ -41,43 +55,55 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     soundEngine.playClick();
+
+    if (!formData.name.trim() || !formData.email.trim() || !formData.details.trim()) {
+      setSubmitState('error');
+      setStatusMessage('Please fill in your Name, Email, and Project Details before sending.');
+      return;
+    }
+
     setSubmitState('sending');
     setStatusMessage('');
 
     try {
+      const payload = new URLSearchParams();
+      payload.append('name', formData.name);
+      payload.append('company', formData.company || 'Not specified');
+      payload.append('email', formData.email);
+      payload.append('phone', formData.phone || 'Not specified');
+      payload.append('message', formData.details);
+      payload.append(
+        '_subject',
+        `Portfolio Inquiry from ${formData.name}${formData.company ? ` (${formData.company})` : ''}`
+      );
+      payload.append('_template', 'table');
+      payload.append('_captcha', 'false');
+
       const response = await fetch(`https://formsubmit.co/ajax/${PERSONAL_INFO.email}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
           Accept: 'application/json',
         },
-        body: JSON.stringify({
-          name: formData.name,
-          company: formData.company || 'Not specified',
-          email: formData.email,
-          phone: formData.phone || 'Not specified',
-          message: formData.details,
-          _subject: `Portfolio Inquiry from ${formData.name}${formData.company ? ` (${formData.company})` : ''}`,
-          _template: 'table',
-          _captcha: 'false',
-        }),
+        body: payload.toString(),
       });
 
       const result = await response.json().catch(() => ({}));
 
       if (response.ok && (result.success === 'true' || result.success === true)) {
         setSubmitState('sent');
-        setStatusMessage(`Message delivered to ${PERSONAL_INFO.email}! I'll get back to you soon.`);
+        setStatusMessage(`✓ Message successfully delivered to ${PERSONAL_INFO.email}! I'll get back to you shortly.`);
         setFormData({ name: '', company: '', email: '', phone: '', details: '' });
       } else {
-        throw new Error(result.message || 'Email relay requires activation or is unavailable');
+        throw new Error(result.message || 'Relay returned non-success');
       }
     } catch {
-      // Seamless fallback: let visitor finish sending immediately via WhatsApp or Email client
-      setSubmitState('error');
+      // Automatic fail-safe: if blocked by ad-blocker or network, open email app with pre-filled message
+      setSubmitState('sent');
       setStatusMessage(
-        'Could not send automatically right now — tap "Send on WhatsApp" below for instant delivery, or email me directly.'
+        `Opening your email client to send directly to ${PERSONAL_INFO.email}... You can also send via WhatsApp below.`
       );
+      window.location.href = buildMailtoUrl();
     }
   };
 
@@ -91,6 +117,13 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
     window.open(buildWhatsAppUrl(), '_blank', 'noopener,noreferrer');
     setSubmitState('sent');
     setStatusMessage('Opened WhatsApp with your message pre-filled — just hit Send!');
+  };
+
+  const handleOpenMailClient = () => {
+    soundEngine.playClick();
+    window.location.href = buildMailtoUrl();
+    setSubmitState('sent');
+    setStatusMessage(`Opened your email app with your message pre-filled to ${PERSONAL_INFO.email}!`);
   };
 
   return (
@@ -164,11 +197,21 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
 
             <button
               type="button"
-              className="contact-submit contact-submit--whatsapp"
+              className="contact-submit contact-submit--secondary"
               onClick={handleWhatsAppSend}
               onMouseEnter={() => soundEngine.playHover()}
             >
               SEND ON WHATSAPP ↗
+            </button>
+
+            <button
+              type="button"
+              className="contact-submit contact-submit--secondary"
+              onClick={handleOpenMailClient}
+              onMouseEnter={() => soundEngine.playHover()}
+              title="Open your email client directly"
+            >
+              OPEN IN MAIL APP ↗
             </button>
           </div>
 
