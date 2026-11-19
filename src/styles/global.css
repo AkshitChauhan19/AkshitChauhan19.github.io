@@ -667,25 +667,12 @@ img {
 /* ============================================
    HOME HERO (3D Particle Rose + Editorial Title)
    ============================================ */
-/* Persistent 3D Cosmic Galaxy Canvas */
-.global-galaxy-canvas {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-
 .home-hero {
   position: relative;
-  z-index: 1;
   width: 100%;
   height: 100vh;
   min-height: 640px;
-  background: transparent;
+  background: #000000;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -741,9 +728,7 @@ img {
    BIO SECTION + ORGANIC PORTRAIT + MARQUEE
    ============================================ */
 .bio-section {
-  position: relative;
-  z-index: 1;
-  background: transparent;
+  background: #000000;
   padding: clamp(80px, 11vh, 136px) clamp(24px, 5vw, 84px);
   max-width: 1440px;
   margin: 0 auto;
@@ -862,16 +847,12 @@ img {
 
 /* Marquee Ticker */
 .marquee-band {
-  position: relative;
-  z-index: 1;
   width: 100%;
   overflow: hidden;
   padding: clamp(36px, 5vh, 64px) 0;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: #000000;
 }
 
 .marquee-track {
@@ -926,9 +907,7 @@ img {
    RESUME EDITORIAL SECTION (Experience, Skills, Education)
    ============================================ */
 .resume-section {
-  position: relative;
-  z-index: 1;
-  background: transparent;
+  background: #000000;
   max-width: 1440px;
   margin: 0 auto;
   padding: clamp(64px, 9vh, 116px) clamp(24px, 5vw, 84px);
@@ -1284,9 +1263,8 @@ img {
    ============================================ */
 .macbook-scroll-track {
   position: relative;
-  z-index: 1;
   height: 330vh;
-  background: transparent;
+  background: #000000;
 }
 
 .macbook-sticky {
@@ -1438,9 +1416,7 @@ img {
    HOME CTA SECTION
    ============================================ */
 .cta-section {
-  position: relative;
-  z-index: 1;
-  background: transparent;
+  background: #000000;
   padding: clamp(80px, 11vh, 128px) 24px;
   text-align: center;
   display: flex;
