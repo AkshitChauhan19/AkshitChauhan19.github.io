@@ -17,25 +17,25 @@ const VERTEX_SHADER = /* glsl */ `
   void main() {
     vec3 pos = position;
 
-    // Gentle organic breathing purely on GPU
-    float wave = sin(uTime * 0.9 + pos.x * 2.1 + pos.y * 1.7 + aRandom * 6.2831);
+    // Organic cosmic swirl and harmonic ripple waves on GPU
+    float wave = sin(uTime * 0.95 + pos.x * 1.8 + pos.y * 1.5 + aRandom * 6.2831);
     float radial = length(pos.xz);
-    pos.y += wave * 0.045 * (0.35 + radial * 0.45);
-    pos.x += cos(uTime * 0.65 + aRandom * 6.2831) * 0.025 * radial;
-    pos.z += sin(uTime * 0.65 + aRandom * 6.2831) * 0.025 * radial;
+    pos.y += wave * 0.055 * (0.35 + radial * 0.35);
+    pos.x += cos(uTime * 0.6 + aRandom * 6.2831) * 0.028 * (0.5 + radial * 0.4);
+    pos.z += sin(uTime * 0.6 + aRandom * 6.2831) * 0.028 * (0.5 + radial * 0.4);
 
     // Subtle pointer + gyroscope sway
-    pos.x += uPointer.x * 0.16 * (0.4 + radial * 0.35);
-    pos.y += uPointer.y * 0.14 * (0.4 + radial * 0.35);
+    pos.x += uPointer.x * 0.22 * (0.4 + radial * 0.3);
+    pos.y += uPointer.y * 0.18 * (0.4 + radial * 0.3);
 
     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix * mvPosition;
 
-    float shimmer = 0.78 + 0.22 * sin(uTime * 2.2 + aRandom * 25.0);
-    gl_PointSize = aScale * uPixelRatio * (20.0 / max(-mvPosition.z, 1.2)) * shimmer;
+    float shimmer = 0.82 + 0.18 * sin(uTime * 2.4 + aRandom * 25.0);
+    gl_PointSize = aScale * uPixelRatio * (28.0 / max(-mvPosition.z, 0.85)) * shimmer;
 
     vColor = aColor;
-    vAlpha = clamp(0.48 + 0.52 * shimmer, 0.0, 1.0);
+    vAlpha = clamp(0.72 + 0.28 * shimmer, 0.0, 1.0);
   }
 `;
 
@@ -48,87 +48,115 @@ const FRAGMENT_SHADER = /* glsl */ `
     float dist = length(centered);
     if (dist > 0.5) discard;
 
-    // Crisp luminous core with soft amber/crimson halo
-    float strength = pow(1.0 - dist * 2.0, 2.1);
-    gl_FragColor = vec4(vColor, strength * vAlpha * 0.94);
+    // Glowing luminous core with soft radiant halo
+    float strength = pow(1.0 - dist * 2.0, 1.75);
+    gl_FragColor = vec4(vColor, strength * vAlpha * 0.98);
   }
 `;
 
-function buildRoseParticleGeometry(count: number): THREE.BufferGeometry {
+function buildGalaxyParticleGeometry(count: number): THREE.BufferGeometry {
   const positions = new Float32Array(count * 3);
   const colors = new Float32Array(count * 3);
   const scales = new Float32Array(count);
   const randoms = new Float32Array(count);
 
-  // Warm rose-gold / crimson / ember palette matching lewiszhang.dev hero rose
-  const coreColor = new THREE.Color('#fff4e0');
-  const amberColor = new THREE.Color('#ff8f3d');
-  const crimsonColor = new THREE.Color('#c92a2a');
-  const outerGold = new THREE.Color('#d9a066');
-  const deepEmber = new THREE.Color('#5c1212');
+  // Vibrant, glowing color palette — NO muddy or dark shades
+  const cWhite = new THREE.Color('#ffffff');
+  const cGold = new THREE.Color('#ffd43b');
+  const cAmber = new THREE.Color('#ffa94d');
+  const cFlame = new THREE.Color('#ff7828');
+  const cRose = new THREE.Color('#ff6b6b');
+  const cCrimson = new THREE.Color('#e03131');
+  const cChampagne = new THREE.Color('#ffe8cc');
   const tmpColor = new THREE.Color();
 
-  const goldenAngle = 2.399963229728653;
-  const coreRatio = 0.62;
+  const numArms = 4;
+  const armCurl = 3.2;
 
   for (let i = 0; i < count; i++) {
     const t = i / count;
 
-    if (t < coreRatio) {
-      // Parametric layered rose petals & spiral galaxy whorls
-      const u = t / coreRatio;
+    if (t < 0.28) {
+      // 1. DENSE LUMINOUS CORE & PHYLLOTAXIS ROSE WHORL (Hero focal nucleus)
+      const u = t / 0.28;
+      const goldenAngle = 2.399963229728653;
       const theta = i * goldenAngle;
-      const petalRings = 1.0 - 0.5 * Math.pow(((3.6 * theta) % (Math.PI * 2)) / Math.PI - 1.0, 2.0);
+      const r = Math.pow(u, 0.62) * 2.15;
+      const cup = Math.pow(u, 1.4) * 0.92 - Math.cos(u * Math.PI * 1.5) * 0.45;
+      const jitter = (Math.random() - 0.5) * 0.12 * (0.2 + u);
 
-      // Radius expands outward across petal whorls
-      const rBase = Math.pow(u, 0.58) * 2.25;
-      const petalCurl = Math.sin(theta * 5.0 + u * 6.5) * 0.24 * u;
-      const r = rBase * (0.76 + 0.32 * petalRings) + petalCurl;
+      positions[i * 3] = Math.cos(theta) * r + jitter;
+      positions[i * 3 + 1] = cup + (Math.random() - 0.5) * 0.1;
+      positions[i * 3 + 2] = Math.sin(theta) * r + jitter;
 
-      // Cupped height profile: tight bud in center, gracefully flared outer petals
-      const cup = Math.pow(u, 1.35) * 0.95 - Math.cos(u * Math.PI * 1.45) * 0.52;
-      const ruffle = Math.sin(theta * 6.0 - u * 5.0) * 0.16 * u;
-
-      const jitter = (Math.random() - 0.5) * 0.08 * (0.3 + u);
-      const x = Math.cos(theta) * r + jitter;
-      const z = Math.sin(theta) * r + jitter;
-      const y = cup + ruffle + (Math.random() - 0.5) * 0.07;
-
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y - 0.15;
-      positions[i * 3 + 2] = z;
-
-      // Color gradient: hot glowing stamen core -> fiery crimson mid -> delicate gold outer edges
-      if (u < 0.14) {
-        tmpColor.copy(coreColor).lerp(amberColor, u / 0.14);
-      } else if (u < 0.56) {
-        tmpColor.copy(amberColor).lerp(crimsonColor, (u - 0.14) / 0.42);
+      if (u < 0.2) {
+        tmpColor.copy(cWhite).lerp(cGold, u / 0.2);
+      } else if (u < 0.6) {
+        tmpColor.copy(cGold).lerp(cAmber, (u - 0.2) / 0.4);
       } else {
-        const edgeMix = (u - 0.56) / 0.44;
-        tmpColor.copy(crimsonColor).lerp(Math.random() > 0.42 ? outerGold : deepEmber, edgeMix);
+        tmpColor.copy(cAmber).lerp(cFlame, (u - 0.6) / 0.4);
+      }
+      scales[i] = 1.0 + Math.random() * 1.6;
+    } else if (t < 0.72) {
+      // 2. FOUR EXPANSIVE SPIRAL ARMS SWEEPING ACROSS THE ENTIRE CANVAS
+      const u = (t - 0.28) / 0.44;
+      const armIndex = i % numArms;
+      const armBaseAngle = (armIndex / numArms) * Math.PI * 2;
+
+      // Radius sweeps from 0.8 out to 6.2 (covers entire screen width & height)
+      const r = 0.8 + Math.pow(u, 0.75) * 5.4;
+      const theta = armBaseAngle + Math.log(r + 0.5) * armCurl;
+
+      // Arm width dispersion increases with distance
+      const dispersion = 0.18 + 0.38 * (r / 6.2);
+      const angleJitter = (Math.random() - 0.5) * dispersion;
+      const radiusJitter = (Math.random() - 0.5) * 0.4;
+      const finalR = Math.max(0.2, r + radiusJitter);
+
+      // Flared vertical height of galaxy disc
+      const height = (Math.random() - 0.5) * (0.4 + 0.35 * (r / 6.2));
+
+      positions[i * 3] = Math.cos(theta + angleJitter) * finalR;
+      positions[i * 3 + 1] = height + Math.sin(theta * 2.0) * 0.15;
+      positions[i * 3 + 2] = Math.sin(theta + angleJitter) * finalR;
+
+      // Color transitions along the arm: warm amber near center -> vibrant rose & crimson outer
+      const colorMix = u;
+      if (colorMix < 0.35) {
+        tmpColor.copy(cGold).lerp(cAmber, colorMix / 0.35);
+      } else if (colorMix < 0.75) {
+        tmpColor.copy(cAmber).lerp(cRose, (colorMix - 0.35) / 0.4);
+      } else {
+        tmpColor.copy(cRose).lerp(cCrimson, (colorMix - 0.75) / 0.25);
       }
 
-      scales[i] = (0.75 + Math.random() * 1.45) * (1.25 - u * 0.45);
+      // 10% chance of an incandescent highlight star
+      if (Math.random() < 0.1) {
+        tmpColor.copy(cChampagne);
+      }
+
+      scales[i] = 0.9 + Math.random() * 1.5;
     } else {
-      // Expansive 3D cosmic dust cloud and nebula stars drifting throughout the entire page
-      const angle = Math.random() * Math.PI * 2;
-      const radius = 0.8 + Math.pow(Math.random(), 0.65) * 4.4;
-      const height = (Math.random() - 0.5) * 4.6;
+      // 3. VOLUMETRIC COSMIC DUST & GLOWING EMBERS FILLING THE ENTIRE 3D SPACE
+      // Distributed across the entire field of view so every part of the webpage is uniformly filled
+      const r = 0.5 + Math.pow(Math.random(), 0.5) * 5.8;
+      const theta = Math.random() * Math.PI * 2;
+      const height = (Math.random() - 0.5) * 5.2;
 
-      positions[i * 3] = Math.cos(angle) * radius;
+      positions[i * 3] = Math.cos(theta) * r;
       positions[i * 3 + 1] = height;
-      positions[i * 3 + 2] = Math.sin(angle) * radius;
+      positions[i * 3 + 2] = Math.sin(theta) * r;
 
-      // Warm stars and embers
-      const starMix = Math.random();
-      if (starMix < 0.3) {
-        tmpColor.copy(coreColor);
-      } else if (starMix < 0.7) {
-        tmpColor.copy(amberColor).lerp(outerGold, Math.random());
+      const seed = Math.random();
+      if (seed < 0.3) {
+        tmpColor.copy(cWhite).lerp(cGold, Math.random());
+      } else if (seed < 0.65) {
+        tmpColor.copy(cAmber).lerp(cFlame, Math.random());
       } else {
-        tmpColor.copy(outerGold).lerp(deepEmber, Math.random() * 0.75);
+        tmpColor.copy(cRose).lerp(cCrimson, Math.random());
       }
-      scales[i] = 0.5 + Math.random() * 1.25;
+
+      scales[i] = 0.75 + Math.random() * 1.4;
     }
 
     colors[i * 3] = tmpColor.r;
@@ -157,8 +185,8 @@ export function ParticleRoseCanvas() {
     const height = window.innerHeight;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 50);
-    camera.position.set(0, 3.15, 4.75);
+    const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 50);
+    camera.position.set(0, 3.2, 5.0);
     camera.lookAt(0, -0.05, 0);
 
     let renderer: THREE.WebGLRenderer;
@@ -179,7 +207,7 @@ export function ParticleRoseCanvas() {
     container.appendChild(renderer.domElement);
 
     const isMobile = window.innerWidth < 768;
-    const geometry = buildRoseParticleGeometry(isMobile ? 9000 : 16000);
+    const geometry = buildGalaxyParticleGeometry(isMobile ? 12000 : 22000);
 
     const uniforms = {
       uTime: { value: 0 },
@@ -197,7 +225,7 @@ export function ParticleRoseCanvas() {
     });
 
     const points = new THREE.Points(geometry, material);
-    points.rotation.x = 0.28;
+    points.rotation.x = 0.32;
     scene.add(points);
 
     const pointerTarget = { x: 0, y: 0 };
@@ -224,9 +252,9 @@ export function ParticleRoseCanvas() {
       camera.aspect = aspect;
       camera.updateProjectionMatrix();
 
-      // Scale smoothly on narrow portrait screens so petals and star field fit harmoniously
-      const roseScale = aspect < 1 ? Math.max(0.62, aspect * 1.15) : 1;
-      points.scale.setScalar(roseScale);
+      // Scale galaxy smoothly so spiral arms reach the edges on any screen
+      const galaxyScale = aspect < 1 ? Math.max(0.72, aspect * 1.25) : 1.05;
+      points.scale.setScalar(galaxyScale);
       renderer.setSize(w, h);
     };
     onResize();
@@ -265,39 +293,26 @@ export function ParticleRoseCanvas() {
       const combinedY = pointerCurrent.y + gyroY * 0.55;
       uniforms.uPointer.value.set(combinedX, combinedY);
 
-      // Continuous fluid 3D cosmic rotation + tilt
-      points.rotation.y += dt * 0.12 + gyroX * 0.012;
-      points.rotation.x = 0.28 + combinedY * 0.26;
+      // Continuous fluid 3D cosmic rotation + tilt — constant speed and presence
+      points.rotation.y += dt * 0.14 + gyroX * 0.012;
+      points.rotation.x = 0.32 + combinedY * 0.24;
       points.rotation.z = -combinedX * 0.16;
 
-      // Smooth scroll parallax
+      // Gentle continuous parallax travel with scroll
       currentScrollY += (targetScrollY - currentScrollY) * 0.08;
       const scrollNorm = currentScrollY / Math.max(window.innerHeight, 1);
-      camera.position.y = 3.15 - Math.sin(scrollNorm * 0.28) * 0.4;
-      points.position.y = -Math.sin(scrollNorm * 0.22) * 0.35;
+      camera.position.y = 3.2 - Math.sin(scrollNorm * 0.28) * 0.35;
+      points.position.y = -Math.sin(scrollNorm * 0.22) * 0.3;
 
-      // Dynamic opacity: 1.0 in hero -> smoothly reduce to 0.18 once scrolled past hero
-      // This ensures 100% readability of text and information while keeping ambient galaxy depth
-      const heroThreshold = Math.max(window.innerHeight * 0.55, 300);
-      let targetOpacity = 1.0;
-      if (currentScrollY <= heroThreshold) {
-        const progress = Math.max(0, currentScrollY / heroThreshold);
-        // Smoothstep curve for seamless easing
-        const t = progress * progress * (3 - 2 * progress);
-        targetOpacity = 1.0 - t * (1.0 - 0.18);
-      } else {
-        targetOpacity = 0.18;
-      }
-
-      // Graceful fade out only when scrolling into the stark white footer
+      // Graceful fade out only when entering the stark white footer
       const maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
       const distFromBottom = maxScroll - currentScrollY;
       if (distFromBottom < 340) {
         const fade = Math.max(0, distFromBottom / 340);
-        targetOpacity *= fade;
+        renderer.domElement.style.opacity = `${fade}`;
+      } else if (renderer.domElement.style.opacity !== '1') {
+        renderer.domElement.style.opacity = '1';
       }
-
-      renderer.domElement.style.opacity = targetOpacity.toFixed(3);
 
       renderer.render(scene, camera);
     };

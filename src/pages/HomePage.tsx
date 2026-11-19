@@ -11,9 +11,8 @@ interface HomePageProps {
 
 export function HomePage({ onNavigate }: HomePageProps) {
   useEffect(() => {
+    // 1. Scroll-triggered reveal animations
     const nodes = Array.from(document.querySelectorAll<HTMLElement>('.reveal'));
-    if (!nodes.length) return;
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -25,9 +24,56 @@ export function HomePage({ onNavigate }: HomePageProps) {
       },
       { threshold: 0.12 }
     );
-
     nodes.forEach((node) => observer.observe(node));
-    return () => observer.disconnect();
+
+    // 2. Interactive 3D glass card tilt & spotlight on cursor hover/movement
+    const cards = Array.from(document.querySelectorAll<HTMLElement>('.glass-card'));
+    const cleanups: (() => void)[] = [];
+
+    cards.forEach((card) => {
+      const onPointerMove = (e: PointerEvent) => {
+        const rect = card.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        card.style.setProperty('--mouse-x', `${mouseX}px`);
+        card.style.setProperty('--mouse-y', `${mouseY}px`);
+
+        // Normalized offset (-0.5 to 0.5) from card center
+        const normX = mouseX / rect.width - 0.5;
+        const normY = mouseY / rect.height - 0.5;
+
+        // Elegant 3D tilt with perspective and subtle lift
+        const rotX = -normY * 8;
+        const rotY = normX * 8;
+
+        card.style.transform = `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translateY(-8px) scale3d(1.015, 1.015, 1.015)`;
+      };
+
+      const onPointerEnter = () => {
+        card.style.transition = 'transform 0.12s ease-out, box-shadow 0.3s ease, border-color 0.3s ease';
+      };
+
+      const onPointerLeave = () => {
+        card.style.transition = 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease, border-color 0.5s ease';
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale3d(1, 1, 1)';
+      };
+
+      card.addEventListener('pointermove', onPointerMove, { passive: true });
+      card.addEventListener('pointerenter', onPointerEnter, { passive: true });
+      card.addEventListener('pointerleave', onPointerLeave, { passive: true });
+
+      cleanups.push(() => {
+        card.removeEventListener('pointermove', onPointerMove);
+        card.removeEventListener('pointerenter', onPointerEnter);
+        card.removeEventListener('pointerleave', onPointerLeave);
+      });
+    });
+
+    return () => {
+      observer.disconnect();
+      cleanups.forEach((fn) => fn());
+    };
   }, []);
 
   return (
@@ -105,7 +151,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
         </div>
 
         {EXPERIENCE.map((exp) => (
-          <article key={exp.company} className="experience-card reveal">
+          <article key={exp.company} className="experience-card glass-card reveal">
             <div>
               <h3 className="experience-card__company">{exp.company}</h3>
               <p className="experience-card__role">{exp.role}</p>
@@ -131,9 +177,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
         </div>
 
         <div className="skills-edu-grid">
-          <div className="skills-groups reveal">
+          <div className="skills-groups glass-card reveal">
             {TECHNICAL_SKILLS.map((group) => (
-              <div key={group.category}>
+              <div key={group.category} className="skill-category-group">
                 <h3 className="skill-group__title">{group.category}</h3>
                 <div className="skill-pills">
                   {group.items.map((skill) => (
@@ -146,7 +192,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
             ))}
           </div>
 
-          <aside className="education-card reveal">
+          <aside className="education-card glass-card reveal">
             <p className="education-card__eyebrow">Education · {EDUCATION.period}</p>
             <h3 className="education-card__inst">{EDUCATION.institution}</h3>
             <p className="education-card__degree">{EDUCATION.degree}</p>
@@ -172,7 +218,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
           <span className="editorial-header__num">( 0 3 )</span>
         </div>
 
-        <div className="resume-download-card reveal">
+        <div className="resume-download-card glass-card reveal">
           <div>
             <h3 className="resume-download-card__title">Curriculum Vitae</h3>
             <p className="resume-download-card__desc">

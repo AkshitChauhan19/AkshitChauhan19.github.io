@@ -958,17 +958,65 @@ img {
   color: rgba(255, 255, 255, 0.72);
 }
 
+/* ============================================
+   GLASSMORPHISM & INTERACTIVE CARD STYLES
+   ============================================ */
+.glass-card {
+  background: rgba(14, 14, 20, 0.46) !important;
+  backdrop-filter: blur(18px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 20px;
+  box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.55),
+              inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.4s ease,
+              border-color 0.4s ease;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+/* Dynamic cursor radial spotlight inside frosted glass */
+.glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.1),
+    transparent 55%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glass-card:hover::before {
+  opacity: 1;
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  box-shadow: 0 28px 60px -14px rgba(0, 0, 0, 0.78),
+              0 0 32px rgba(255, 140, 66, 0.16),
+              inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+}
+
+.glass-card > * {
+  position: relative;
+  z-index: 2;
+}
+
 .experience-card {
   display: grid;
   grid-template-columns: 0.9fr 1.6fr;
   gap: clamp(24px, 4vw, 64px);
-  padding: clamp(28px, 3.5vw, 44px);
-  margin-bottom: 40px;
-  background: rgba(10, 10, 12, 0.65);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 18px;
+  padding: clamp(32px, 4vw, 52px);
+  margin-bottom: 36px;
 }
 
 .experience-card__company {
@@ -1024,7 +1072,7 @@ img {
   padding-left: 22px;
   font-size: clamp(15px, 1.25vw, 17px);
   line-height: 1.72;
-  color: rgba(255, 255, 255, 0.88);
+  color: rgba(255, 255, 255, 0.78);
   font-weight: 300;
 }
 
@@ -1039,7 +1087,7 @@ img {
 .skills-edu-grid {
   display: grid;
   grid-template-columns: 1.55fr 0.85fr;
-  gap: clamp(40px, 6vw, 84px);
+  gap: clamp(32px, 5vw, 64px);
   align-items: start;
 }
 
@@ -1047,12 +1095,7 @@ img {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 32px 36px;
-  padding: clamp(24px, 3vw, 36px);
-  background: rgba(10, 10, 12, 0.65);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
+  padding: clamp(32px, 4vw, 44px);
 }
 
 .skill-group__title {
@@ -1071,29 +1114,29 @@ img {
 }
 
 .skill-pill {
-  padding: 6px 13px;
+  padding: 7px 15px;
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  font-size: 12.5px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-size: 13px;
   font-weight: 300;
   letter-spacing: 0.02em;
-  color: rgba(255, 255, 255, 0.82);
-  transition: border-color 0.25s ease, background-color 0.25s ease, color 0.25s ease;
+  color: rgba(255, 255, 255, 0.88);
+  transition: all 0.25s ease;
 }
 
 .skill-pill:hover {
   border-color: #ffffff;
   background: #ffffff;
   color: #000000;
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
 }
 
 .education-card {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: clamp(24px, 3vw, 36px);
-  background: rgba(10, 10, 12, 0.65);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  padding: clamp(32px, 4vw, 44px);
 }
 
 .education-card__eyebrow {
@@ -1155,12 +1198,7 @@ img {
   justify-content: space-between;
   gap: 32px;
   flex-wrap: wrap;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: clamp(28px, 3.5vw, 44px);
-  background: rgba(10, 10, 12, 0.65);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  padding: clamp(32px, 4vw, 48px);
 }
 
 .resume-download-card__title {
