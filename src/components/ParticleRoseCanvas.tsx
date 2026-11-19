@@ -270,21 +270,34 @@ export function ParticleRoseCanvas() {
       points.rotation.x = 0.28 + combinedY * 0.26;
       points.rotation.z = -combinedX * 0.16;
 
-      // Parallax travel with scroll
+      // Smooth scroll parallax
       currentScrollY += (targetScrollY - currentScrollY) * 0.08;
       const scrollNorm = currentScrollY / Math.max(window.innerHeight, 1);
       camera.position.y = 3.15 - Math.sin(scrollNorm * 0.28) * 0.4;
       points.position.y = -Math.sin(scrollNorm * 0.22) * 0.35;
+
+      // Dynamic opacity: 1.0 in hero -> smoothly reduce to 0.18 once scrolled past hero
+      // This ensures 100% readability of text and information while keeping ambient galaxy depth
+      const heroThreshold = Math.max(window.innerHeight * 0.55, 300);
+      let targetOpacity = 1.0;
+      if (currentScrollY <= heroThreshold) {
+        const progress = Math.max(0, currentScrollY / heroThreshold);
+        // Smoothstep curve for seamless easing
+        const t = progress * progress * (3 - 2 * progress);
+        targetOpacity = 1.0 - t * (1.0 - 0.18);
+      } else {
+        targetOpacity = 0.18;
+      }
 
       // Graceful fade out only when scrolling into the stark white footer
       const maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
       const distFromBottom = maxScroll - currentScrollY;
       if (distFromBottom < 340) {
         const fade = Math.max(0, distFromBottom / 340);
-        renderer.domElement.style.opacity = `${fade}`;
-      } else if (renderer.domElement.style.opacity !== '1') {
-        renderer.domElement.style.opacity = '1';
+        targetOpacity *= fade;
       }
+
+      renderer.domElement.style.opacity = targetOpacity.toFixed(3);
 
       renderer.render(scene, camera);
     };
